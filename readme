@@ -1,0 +1,31 @@
+# import urllib3
+import ms.version
+ms.version.addpkg('requests', '2.18.4')
+ms.version.addpkg('requests-kerberos', '0.11.0-ms1')
+ms.version.addpkg('kerberos', '1.2.5')
+
+ms.version.addpkg('urllib3', '1.21.1')
+ms.version.addpkg('chardet', '3.0.4')
+ms.version.addpkg('certifi', '2018.1.18')
+ms.version.addpkg('idna', '2.6')
+import argparse
+import concurrent.futures
+import requests
+from requests_kerberos import HTTPKerberosAuth
+import urllib3
+urllib3.disable_warnings()
+
+url="http://localhost:8888/api/alert_source/GetAlertSources"
+url2="http://rulemanager-a5.webfarm-qa.ms.com/rulemanager/api/alert_source/GetAlertSources"
+# r=requests.get(url)
+# print(r.json())
+
+#s = requests.Session()
+#r = s.get(url2, auth=HTTPKerberosAuth(principal='',mutual_authentication=False, force_preemptive=True), verify=False)
+
+r = requests.get(url2, auth=HTTPKerberosAuth(principal='',mutual_authentication=False, force_preemptive=True), verify=False)
+if(r.status_code==200):
+	print(r.json())
+else:
+	print(r.status_code)
+
