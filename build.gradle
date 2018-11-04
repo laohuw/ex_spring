@@ -1,0 +1,85 @@
+buildscript {
+	ext {
+//		springBootVersion = '1.5.17.RELEASE'
+		springBootVersion = '2.0.5.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven{
+			url "http://plugins.gradle.org/m2"
+		}
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.13.0")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+//apply plugin: 'war'
+//apply plugin: 'application'
+apply plugin: 'com.palantir.docker'
+
+bootJar{
+	baseName='test'
+	version = '1.0.0'
+}
+group = 'com.algo'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+configurations {
+	providedRuntime
+}
+
+dependencies {
+//	compile('org.springframework.boot:spring-boot-starter-aop')
+//	compile('org.springframework.boot:spring-boot-starter-cache')
+//	compile('org.springframework.boot:spring-boot-starter-data-elasticsearch')
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+//	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+//	compile('org.springframework.boot:spring-boot-starter-data-rest')
+	compile('org.springframework.boot:spring-boot-starter-jdbc')
+//	compile('org.springframework.boot:spring-boot-starter-security')
+//	compile('org.springframework.boot:spring-boot-starter-validation')
+	compile('org.springframework.boot:spring-boot-starter-web')
+//	compile('org.springframework.boot:spring-boot-start-actuator')
+//	compile('org.springframework.boot:spring-boot-starter-webflux')
+//	compile('org.apache.cxf:cxf-spring-boot-starter-jaxrs:3.2.5')
+//	compile('org.apache.kafka:kafka-streams:1.0.1')
+//	compile('org.springframework.kafka:spring-kafka')
+//	compile('org.springframework.session:spring-session-jdbc')
+	compile('io.springfox:springfox-swagger2:2.9.2')
+	compile('io.springfox:springfox-swagger-ui:2.9.2')
+	runtime('com.h2database:h2')
+	compile('com.zaxxer:HikariCP:3.2.0')
+	compile('com.hazelcast:hazelcast:3.10.6')
+	compile('com.hazelcast:hazelcast-hibernate52:1.2.3')
+//	runtime('org.springframework.boot:spring-boot-devtools')
+	providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+//	testCompile('io.projectreactor:reactor-test')
+//	testCompile('org.springframework.security:spring-security-test')
+}
+
+//springBoot {
+//	mainClass = "com.algo.ServletInitializer"
+//}
+
+task unpack(type: Copy){
+	dependsOn bootJar
+	from(zipTree(tasks.bootJar.outputs.files.singleFile))
+	into("build/dependency")
+}
+
+docker{
+	name "${project.group}/${bootJar.baseName}"
+	copySpec.from(tasks.unpack.outputs).into("dependency")
+	buildArgs(['DEPENDENCY': "dependency"])
+}
